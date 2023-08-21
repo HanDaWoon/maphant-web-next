@@ -34,7 +34,6 @@
   background-color: rgb(240, 240, 240);
   font-size: 1.5rem;
   color: black;
-
 }
 .dark .boardName {
   margin: 1rem;
@@ -47,7 +46,6 @@
   background-color: rgb(240, 240, 240);
   font-size: 1.5rem;
   color: black;
-
 }
 .postMenu1 {
   margin: 1rem;
@@ -160,17 +158,26 @@
   align-items: center;
   gap: 1rem;
 }
-.pageBtn {
+.pageBtnOn {
   background-color: white;
+  display: flex;
+  align-items: center;
   border: 0;
 }
-.pageBtn:hover {
-  background-color: rgb(233, 233, 233);
+.pageBtnOff {
+  background-color: white;
+  color: #ababab;
+  display: flex;
+  align-items: center;
+  border: 0;
+}
+.pageBtnOn:hover {
+  color: #5299eb;
   cursor: pointer;
 }
 
 .postList {
-  margin: 1rem;
+  margin: 0, 1rem, 1rem 1rem;
   width: 100%;
 }
 .postPage {
@@ -178,7 +185,6 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }
 
 @keyframes dropdown {

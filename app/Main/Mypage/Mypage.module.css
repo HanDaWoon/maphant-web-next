@@ -74,9 +74,9 @@
 }
 .modalcg {
   background-color: white;
-  padding: 50px;
-  padding-top: 5%;
-  padding-bottom: 5%;
+  padding: 30px;
+  padding-top: 0.3%;
+  padding-bottom: 0.3%;
   border-radius: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   padding-left: 7%;
@@ -94,6 +94,12 @@
   padding: 10px;
   border-radius: 20px;
   width: 50%;
+}
+.mydata3 {
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 20px;
+  width: 80%;
 }
 
 .mydatafix {
@@ -117,9 +123,22 @@
   padding: 10px 15px;
   border-radius: 10px;
   cursor: pointer;
+  margin-left: 30%;
+}
+.closebutton2 {
+  background-color: rgb(95, 178, 242);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-left: 35%;
+}
+.closebutton:hover {
+  background-color: #0056b3;
 }
 
-.closebutton:hover {
+.closebutton2:hover {
   background-color: #0056b3;
 }
 
@@ -161,4 +180,13 @@
   border-radius: 5px;
   padding: 10px;
   margin-bottom: 30px;
+  padding-right: 20px;
+}
+
+.llist {
+  padding-left: 3px;
+}
+
+.Dlist {
+  margin-right: 20px;
 }
