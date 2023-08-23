@@ -4,14 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { ReactElement } from "react";
 
-import AppImg from "./img/Icon.png";
+import AppImg from "./img/IconImg.png";
 import classes from "./SearchAccount.module.css";
 
 export default function SearchAccount(): ReactElement {
   return (
     <div>
       <div className={classes.outer}>
-        <div className={classes.appImg}>
+        <div className={classes.Img}>
           <p>
             <Image src={AppImg} className={classes.image} alt={""} />
           </p>

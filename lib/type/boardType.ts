@@ -27,6 +27,8 @@ type BoardDetail = {
   userId?: number;
   tags?: string[];
   body:string;
+  tagNames:string;
+  bookmark : boolean;
 };
 
 export type { BoardListItem , BoardDetail};

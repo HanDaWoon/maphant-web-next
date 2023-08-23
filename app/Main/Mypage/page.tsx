@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 
 import styles from "./Mypage.module.css";
 import { useRouter } from "next/navigation";
 import UserStorage from "@/lib/storage/UserStorage";
 import UserAPI from "@/lib/api/UserAPI";
-import { text } from "stream/consumers";
+import { uploadAPI } from "@/lib/api/fetchAPI";
 
 export default function Page() {
   const router = useRouter();
@@ -26,6 +26,41 @@ export default function Page() {
     setShowNewPw(!showNewPw);
   };
 
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+  //내소개 정보및 이미지받기
+  const [myinfo, setMyinfo] = useState("");
+  const [myimg, setMyimg] = useState(null);
+  const [imagelurl, setMyImageUrl] = useState("");
+  //profile정보 받아오기
+
+  useEffect(() => {
+    UserAPI.GETUserProfile(userData.id).then((res) => {
+      setMyinfo(res.data.body);
+      setMyimg(res.data.profileImg);
+    });
+  }, [userData.id]);
+
+  console.log("나의 정보 :", myinfo);
+  console.log("나의 이미지 :", myimg);
+  const handleImageChange = (files: FileList) => {
+    if (files.length > 0) {
+      const selectedFile = files[0];
+      setMyimg(selectedFile);
+      const imageUrl = URL.createObjectURL(selectedFile);
+      setMyImageUrl(imageUrl);
+    }
+  };
+  const changemyinfo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMyinfo(e.target.value);
+  };
+  // 현재 열려 있는 페이지를 추적하는 상태
+  const [activePage, setActivePage] = useState("myInfo"); // 초기값은 "myInfo"로 설정
+
+  // 페이지 전환 함수
+  const changePage = (page: any) => {
+    setActivePage(page);
+  };
   //체크 박스 선택 및 삭제
   const [selectcg, setSelcetCg] = useState<number[]>([]);
 
@@ -56,6 +91,7 @@ export default function Page() {
     setdepart("");
   };
 
+  //내정보 수정 다른상태
   //로그아웃 기능구현
   const loadUserData = async () => {
     try {
@@ -152,7 +188,18 @@ export default function Page() {
       alert("카테고리 삭제 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
   };
+  useEffect(() => {
+    if (myimg instanceof Blob) {
+      const imageUrl = URL.createObjectURL(myimg);
 
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        setIsImageLoaded(true); // Set the isImageLoaded state to true
+        setMyImageUrl(imageUrl);
+      };
+    }
+  }, [myimg]);
   //전공계열,학과
   const [major, setmajor] = useState("");
   const [depart, setdepart] = useState("");
@@ -221,8 +268,6 @@ export default function Page() {
   };
 
   //회원탈퇴
-
-  const [delstate, delsetState] = useState(false);
   const IDDelete = async () => {
     const delstate = confirm(
       `회원탈퇴하시겠습니끼? 
@@ -240,10 +285,56 @@ export default function Page() {
     }
   };
 
-  // 작성한 댓글 목록
+  //내 정보 수정
+  const changebody = () => {
+    const formData = new FormData();
+    formData.append("body", myinfo);
 
+    uploadAPI("PATCH", "/profile", formData).then((res) => {
+      alert("내소개글이 수정되었습니다."), setMydataOpen(false);
+    });
+  };
+
+  const changeimg = () => {
+    if (myimg) {
+      let fd = new FormData();
+      fd.append("file", myimg);
+
+      uploadAPI("PATCH", "/profile", fd)
+        .then((res) => {
+          alert("내 이미지 수정이완료되었습니다."), setMydataOpen(false);
+          window.location.reload();
+        })
+        .catch((error) => console.error("Error uploading image:", error));
+    }
+  };
+  // 작성한 댓글 목록
   const MyChat = () => {
-    router.replace(`/Main/MyChat?=${userData.id}`);
+    router.replace(`/Main/MyChat?id=${userData.id}`);
+  };
+
+  const Mylist = () => {
+    router.replace(`/Main/Mylist?id=${userData.id}`);
+  };
+
+  const Mylike = () => {
+    router.replace(`/Main/Mylike?id=${userData.id}`);
+  };
+
+  const BookMark = () => {
+    router.push(`/Main/BookMark`);
+  };
+
+  //소개글
+  // 소개글의 최대 글자수 설정
+  const maxChars = 100;
+
+  // 소개글 변경 이벤트 핸들러
+  const handleMyinfoChange = (e) => {
+    const newText = e.target.value;
+    if (newText.length <= maxChars) {
+      setMyinfo(newText);
+    }
   };
   return (
     <div className={styles.container}>
@@ -252,7 +343,7 @@ export default function Page() {
         <div className={styles.userDetails}>
           <section className={styles.profileSection}>
             <img
-              src="user-profile.jpg"
+              src={`${myimg}?v=${Math.random()}`} // 새로운 랜덤 값을 쿼리 파라미터로 추가
               alt="User Profile"
               className={styles.profileImage}
             />
@@ -272,7 +363,18 @@ export default function Page() {
               )}
             </div>
           </section>
-          <label>소개글 :</label>
+          <hr />
+          <label>※ 소개글</label>
+          <div className={styles.myinfoBox}>
+            <div
+              className={styles.myinfo}
+              style={{ whiteSpace: "pre-line" }}
+              dangerouslySetInnerHTML={{
+                __html: myinfo,
+              }}
+            />
+          </div>
+          <hr />
         </div>
       </section>
       <section className={styles.accountSettings}>
@@ -283,18 +385,18 @@ export default function Page() {
           <label onClick={handlepwopen}>비밀번호 수정</label>
           <br />
           <label onClick={handlemycgopen}>계열 학과 수정</label>
-          <br />
-          <label>소개 글 수정</label>
         </div>
       </section>
       <section className={styles.communitySettings}>
         <h2>커뮤니티 </h2>
         <div className={styles.list}>
-          <label>내 게시판</label>
+          <label onClick={Mylist}>내 게시판</label>
           <br />
-          <label>즐겨찾기 한 게시판</label>
+          <label onClick={BookMark}>내 북마크</label>
           <br />
           <label onClick={MyChat}>작성한 댓글 목록</label>
+          <br />
+          <label onClick={Mylike}>좋아요한 글 목록</label>
         </div>
       </section>
       <section className={styles.etc}>
@@ -312,36 +414,99 @@ export default function Page() {
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <h2>내 정보 수정</h2>
-            <label>닉네임만 수정 가능합니다.</label>
+            <div className={styles.pageButtons}>
+              <button
+                className={activePage === "myInfo" ? styles.activePage : ""}
+                onClick={() => changePage("myInfo")}
+              >
+                내 정보
+              </button>
+              <button
+                className={
+                  activePage === "profileEdit" ? styles.activePage : ""
+                }
+                onClick={() => changePage("profileEdit")}
+              >
+                프로필 수정
+              </button>
+              <button
+                className={activePage === "introEdit" ? styles.activePage : ""}
+                onClick={() => changePage("introEdit")}
+              >
+                소개 글 수정
+              </button>
+            </div>
+            <br /> ※사진은 새로고침하면 적용이됩니다.
+            <br /> ※글자수는 100자 제한입니다.
+            {activePage === "myInfo" && (
+              <div className={styles.pageContent}>
+                <input
+                  className={styles.mydata}
+                  type="text"
+                  placeholder="이름"
+                  value={userData.name}
+                  readOnly
+                />
+                <input
+                  className={styles.mydata}
+                  type="text"
+                  placeholder="닉네임"
+                  value={newNickname}
+                  onChange={(e) => NicknameChange(e.target.value)}
+                />
+                <input
+                  className={styles.mydata}
+                  type="text"
+                  defaultValue={userData.studentNo}
+                  readOnly
+                />
+                <br />
+                <button
+                  className={styles.mydatafix}
+                  type="submit"
+                  onClick={handleNicknameUpdate}
+                >
+                  수정하기
+                </button>
+              </div>
+            )}
+            {activePage === "profileEdit" && (
+              <div className={styles.pageContent}>
+                <h3>프로필 사진 변경</h3>
+                <input
+                  className={styles.profilecss}
+                  type="file"
+                  accept="image/*" // This attribute ensures only image files can be selected
+                  onChange={(e) => handleImageChange(e.target.files)}
+                />
+                <button className={styles.mydatafix} onClick={changeimg}>
+                  수정하기
+                </button>
+              </div>
+            )}
+            {activePage === "introEdit" && (
+              <div className={styles.pageContent}>
+                <h3>소개 글 수정</h3>
+                <textarea
+                  className={styles.infocss}
+                  value={myinfo}
+                  onChange={handleMyinfoChange}
+                  maxLength={maxChars} // 최대 글자수 설정
+                  placeholder="100자까지 가능합니다"
+                />
+                <br />
+                <button
+                  className={styles.mydatafix}
+                  type="submit"
+                  onClick={() => {
+                    changebody(); // myinfo 수정을 서버로 보냄
+                  }}
+                >
+                  수정하기
+                </button>
+              </div>
+            )}
             <br />
-            <input
-              className={styles.mydata}
-              type="text"
-              placeholder="이름"
-              value={userData.name}
-              readOnly
-            />
-            <input
-              className={styles.mydata}
-              type="text"
-              placeholder="닉네임"
-              value={newNickname}
-              onChange={(e) => NicknameChange(e.target.value)}
-            />
-            <input
-              className={styles.mydata}
-              type="text"
-              defaultValue={userData.studentNo}
-              readOnly
-            />
-            <br />
-            <button
-              className={styles.mydatafix}
-              type="submit"
-              onClick={handleNicknameUpdate}
-            >
-              수정하기
-            </button>
             <button className={styles.closebutton} onClick={handlemydataclose}>
               닫기
             </button>

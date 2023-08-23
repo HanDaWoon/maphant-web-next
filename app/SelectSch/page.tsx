@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ReactElement, useEffect, useState } from "react";
 
-import IconImg from "./img/Icon.png";
+import IconImg from "./img/IconImg.png";
 import { headers } from "next/dist/client/components/headers";
 
 export default function SelectSch(): ReactElement {
@@ -84,7 +84,7 @@ export default function SelectSch(): ReactElement {
     <div className="outer">
       <nav className="margin">
         <div className="imgbox">
-          <Image src={IconImg} alt="" />
+          <Image src={IconImg} className="ImageSch" alt="" />
           <label>
             <b>학과 선택</b>
           </label>

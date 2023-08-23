@@ -1,7 +1,7 @@
 import { statusResponse } from "@/app/fetchAPI";
 import { BoardListItem } from "../type/boardType";
-import { PostType, readPostType } from "../type/postType";
-import { dataResponse, GetAPI, PostAPI } from "./fetchAPI";
+import { EditType, PostType, readPostType } from "../type/postType";
+import { dataResponse, GetAPI, PostAPI, PutAPI } from "./fetchAPI";
 import { DeleteAPI } from "./fetchAPI";
 
 class BoardAPI {
@@ -37,8 +37,8 @@ class BoardAPI {
     return PostAPI<statusResponse>(`/board/like/${boardId}/`);
   }
 
-  static MyChatLoad(page: number, recordSize: number) {
-    const queryParams = `?page=${page}&recordSize=${recordSize}`;
+  static MyChatLoad(page: number, recordSize: number, targetUserId: number) {
+    const queryParams = `?page=${page}&recordSize=${recordSize}&targetUserId=${targetUserId}`;
     return GetAPI<
       dataResponse<{
         list: {
@@ -55,6 +55,45 @@ class BoardAPI {
     >(`/profile/comment${queryParams}`);
   }
 
+  static MylistLoad(page: number, recordSize: number, targetUserId: number) {
+    const queryParams = `?page=${page}&recordSize=${recordSize}&targetUserId=${targetUserId}`;
+    return GetAPI<
+      dataResponse<{
+        list: {
+          body: string;
+          category_id: number;
+          comment_cnt: number;
+          created_at: string;
+          id: number;
+          like_cnt: number;
+          report_cnt: number;
+          title: string;
+          type: string;
+          user_id: number;
+        }[];
+      }>
+    >(`/profile/board${queryParams}`);
+  }
+  static MylikeLoad(page: number, recordSize: number) {
+    const queryParams = `?page=${page}&recordSize=${recordSize}`;
+    return GetAPI<
+      dataResponse<{
+        list: {
+          body: string;
+          category_id: number;
+          comment_cnt: number;
+          created_at: string;
+          id: number;
+          like_cnt: number;
+          report_cnt: number;
+          title: string;
+          type: string;
+          user_id: number;
+        }[];
+      }>
+    >(`/profile/like${queryParams}`);
+  }
+
   static reportPost(boardId: number) {
     return PostAPI<statusResponse>(
       `/board/report/?boardId=${boardId}&reportId=1`
@@ -62,6 +101,16 @@ class BoardAPI {
   }
   static PostDelete(boardId: number) {
     return DeleteAPI<statusResponse>(`/board/${boardId}/`);
+  }
+  static starPost(boardId: string) {
+    return PostAPI<statusResponse>(`/bookmark/${boardId}`);
+  }
+  static editPost( data:EditType  ) {
+    return PutAPI<statusResponse>(`/board/update/`, data);
+  }
+
+  static Getbookmark() {
+    return GetAPI<dataResponse>("/bookmark/my-list");
   }
 }
 

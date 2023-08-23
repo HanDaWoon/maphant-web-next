@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ReactElement, useState } from "react";
 
-import IconImg from "./img/Icon.png";
+import IconImg from "./img/IconImg.png";
 
 export default function EmailCheck(): ReactElement {
   const [email, setEmail] = useState("");
@@ -107,10 +107,8 @@ export default function EmailCheck(): ReactElement {
     <div className="outerEmail">
       <nav className="Emailmargin">
         <div className="Emailimgbox">
-          <Image src={IconImg} alt="" />
-          <label>
-            <b>이메일 인증</b>
-          </label>
+          <Image src={IconImg} alt="" className="emailImage" />
+          <label className="EmailTitle">이메일 인증</label>
         </div>
         <br />
         <div className="email">
