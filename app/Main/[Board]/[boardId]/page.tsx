@@ -15,7 +15,7 @@ import Comment from "./Comment";
 import CommentList from "./CommentList";
 import { CommentType } from "@/lib/type/CommentType";
 import { BoardInfo } from "@/lib/Function/boardFunction";
-import Update from "./Update/page";
+import Image from "next/image";
 
 const page = () => {
   const router = useRouter();
@@ -89,7 +89,7 @@ const page = () => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
       BoardAPI.PostDelete(parseInt(boardId)).then(() => {
         alert("글을 삭제되었습니다");
-        router.back();
+        router.push(`/Main/${boardLink}`)
       });
     }
   };
@@ -102,7 +102,7 @@ const page = () => {
     BoardAPI.starPost(boardId)
       .then(() => {
         alert("북마크 했습니다");
-        getComment();
+        getPost();
       })
       .catch((err) => alert("이미 북마크된 게시물입니다"));
   };
@@ -115,13 +115,9 @@ const page = () => {
         </div>
 
         <div className={styles.postman}>
-          <div className={styles.nickname}>
-            {article && article.board.userId}
-          </div>
-
           <div className={styles.timeset} style={{ fontSize: ".7rem" }}>
             <div className={styles.content}>
-              {article?.board.title}
+              <div className={styles.title}>{article?.board.title}</div>
               <div className={styles.nicktime}>
                 <h4> {article?.board.userNickname}</h4>
                 <p>
@@ -160,7 +156,17 @@ const page = () => {
               )}
             </div>
           </div>
-          <div className={styles.boardbody}>{article?.board.body}</div>
+          <div className={styles.boardbody}>
+            {article &&
+              article.board.imagesUrl &&
+              article.board.imagesUrl?.length > 0 &&
+              article.board.imagesUrl.map((item, i) => (
+                <div className={styles.imgbox}>
+                  <Image src={item} alt="" fill key={item + i} />
+                </div>
+              ))}
+            {article?.board.body}
+          </div>
 
           <div className={styles.hashtag}>
             {article?.board.tags.map((item, index) => (
@@ -182,9 +188,9 @@ const page = () => {
             {article && commentList && (
               <CommentList
                 commentList={commentList.list}
-                isMyArticle={article.board.isMyBoard}
+                boardId={article.board.id}
                 commentCnt={article.board.commentCnt}
-                getComment={getComment}
+                getComment={getPost}
               />
             )}
           </div>

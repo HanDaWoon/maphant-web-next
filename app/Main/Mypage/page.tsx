@@ -297,6 +297,7 @@ export default function Page() {
 
   const changeimg = () => {
     if (myimg) {
+      console.log(myimg);
       let fd = new FormData();
       fd.append("file", myimg);
 
@@ -310,15 +311,15 @@ export default function Page() {
   };
   // 작성한 댓글 목록
   const MyChat = () => {
-    router.replace(`/Main/MyChat?id=${userData.id}`);
+    router.push(`/Main/MyChat?id=${userData.id}`);
   };
 
   const Mylist = () => {
-    router.replace(`/Main/Mylist?id=${userData.id}`);
+    router.push(`/Main/Mylist?id=${userData.id}`);
   };
 
   const Mylike = () => {
-    router.replace(`/Main/Mylike?id=${userData.id}`);
+    router.push(`/Main/Mylike?id=${userData.id}`);
   };
 
   const BookMark = () => {
@@ -507,7 +508,7 @@ export default function Page() {
               </div>
             )}
             <br />
-            <button className={styles.closebutton} onClick={handlemydataclose}>
+            <button className={styles.mydatafix} onClick={handlemydataclose}>
               닫기
             </button>
           </div>

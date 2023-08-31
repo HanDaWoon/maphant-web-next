@@ -5,16 +5,25 @@ import ErrorPage from "next/error";
 
 import HashTagList from "./HashTagList";
 import ImgList from "./ImgList";
+import Vote from "./Vote";
 import styles from "./newPost.module.css";
-import { PostType } from "@/lib/type/postType";
+import { PostType, uploadType } from "@/lib/type/postType";
 import BoardAPI from "@/lib/api/BoardAPI";
 import { BoardInfo } from "@/lib/Function/boardFunction";
+import { uploadAPI } from "@/lib/api/fetchAPI";
 
 type fileListType = {
   imgFile: File[];
   imgURL: string[];
 };
 
+type imgRes = {
+  url: string;
+};
+type Poll = {
+  title: string;
+  options: string[];
+};
 function NewPost() {
   const router = useRouter();
   const boardURL = usePathname();
@@ -31,6 +40,8 @@ function NewPost() {
     imgFile: [],
     imgURL: [],
   });
+  const [pollData, setPollData] = useState<Poll>();
+  const [anony, setAnony] = useState<boolean>(false);
 
   const [changed, setChanged] = useState<boolean>(false);
   const titleRef = useRef<HTMLInputElement>(null);
@@ -47,7 +58,6 @@ function NewPost() {
         event.returnValue = "";
       }
     };
-
     window.addEventListener("beforeunload", unloadListner);
 
     return () => {
@@ -57,15 +67,41 @@ function NewPost() {
 
   const PostEvent = () => {
     if (titleRef.current?.value && contentRef.current?.value) {
-      console.log(hashTag);
-      setPostData({
-        typeId: boardType,
-        title: titleRef.current.value,
-        body: contentRef.current.value,
-        isAnonymous: 0,
-        isHide: 0,
-        tagNames: hashTag ? hashTag : undefined,
-      });
+      let imgURL: string[] = [];
+      if (fileList.imgFile.length > 0) {
+        const imgForm = new FormData();
+        fileList.imgFile.map((item) => {
+          imgForm.append("files", item);
+        });
+
+        uploadAPI<uploadType>("POST", "/image", imgForm)
+          .then((res) => {
+            res.map((item) => imgURL.push(item.url));
+          })
+          .catch((err) => console.log(err));
+      }
+      if (pollData) {
+        setPostData({
+          typeId: boardType,
+          title: titleRef.current.value,
+          body: contentRef.current.value,
+          isAnonymous: anony ? 1 : 0,
+          isHide: 0,
+          imagesUrl: imgURL.length > 0 ? imgURL : undefined,
+          tagNames: hashTag ? hashTag : undefined,
+          pollInfo: pollData,
+        });
+      } else {
+        setPostData({
+          typeId: boardType,
+          title: titleRef.current.value,
+          body: contentRef.current.value,
+          isAnonymous: anony ? 1 : 0,
+          isHide: 0,
+          imagesUrl: imgURL.length > 0 ? imgURL : undefined,
+          tagNames: hashTag ? hashTag : undefined,
+        });
+      }
     } else {
       alert("제목과 내용을 모두 입력해 주세요.");
     }
@@ -73,14 +109,6 @@ function NewPost() {
 
   useEffect(() => {
     if (postData) {
-      const imgData = new FormData();
-      fileList.imgFile.forEach((item) => {
-        imgData.append("img", item);
-      });
-      console.log(imgData);
-      BoardAPI.imgUpload(imgData).catch((err) => {
-        console.log(err);
-      });
       console.log(postData);
       BoardAPI.newPostArticle(postData)
         .then(() => {
@@ -120,6 +148,11 @@ function NewPost() {
         <ImgList fileList={fileList} setFileList={setFileList} />
       </div>
 
+      <div className={styles.vote}>
+        <p style={{ margin: "1%" }}>- 투표</p>
+        <Vote pollData={pollData} setPollData={setPollData} />
+      </div>
+
       <div className={styles.newContent}>
         <p style={{ margin: "1%" }}>- 내용</p>
         <textarea
@@ -130,6 +163,16 @@ function NewPost() {
         ></textarea>
       </div>
       <div className={styles.newPostMenu}>
+        <div>
+          <input
+            type="checkbox"
+            onChange={() => {
+              setAnony(!anony);
+            }}
+            checked={anony}
+          />
+          익명
+        </div>
         <button
           className={styles.cancelBtn}
           onClick={() => router.push(`/Main/${boardLink}`)}
